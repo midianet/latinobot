@@ -1,0 +1,40 @@
+<?xml version = "1.0" encoding	= "UTF-8"?>
+
+<beans 	xmlns 				 = "http://www.springframework.org/schema/beans"
+          xmlns:xsi			 = "http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:tx		 	 = "http://www.springframework.org/schema/tx"
+          default-autowire   = "byName"
+          xmlns:context		 = "http://www.springframework.org/schema/context"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+							    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+							    http://www.springframework.org/schema/tx
+							    http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+							    http://www.springframework.org/schema/context
+							    http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <context:annotation-config />
+
+    <context:component-scan base-package = "midianet.latinoware" />
+
+    <tx:annotation-driven transaction-manager = "txManager"/>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="url" value="jdbc:postgresql://localhost:5432/latinoware"/>
+        <property name = "username" value = "postgres" />
+        <property name = "password" value = "postgres" />
+    </bean>
+
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate" id="namedParameterJdbcTemplate">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+
+    <bean class="org.springframework.jdbc.core.JdbcTemplate" id="jdbcTemplate">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+
+</beans>
