@@ -14,6 +14,7 @@ import org.telegram.telegrambots.api.methods.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -97,10 +98,17 @@ public class LatinowareBot extends TelegramLongPollingBot {
     private void actionPayment(final Update update){
         final StringBuilder retorno = new StringBuilder();
         final Parametro p = bussinesParametro.findByChave("CARAVANA").get();
-        double valor = Double.parseDouble(p.getValor()) * -1;
+        double valor = Double.parseDouble(p.getValor());
         retorno.append(p.getDescricao()).append(" ").append(p.getValor());
-        final List<Pagamento> pagamentos =  bussinesFinanceiro.
-
+        final Optional<Pessoa> pes = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
+        if(pes.isPresent()){
+            final List<Pagamento> pagamentos = bussinesFinanceiro.listByPessoa(pes.get());
+            for(Pagamento pg : pagamentos){
+                valor = valor - pg.getValor();
+                retorno.append("\n").append(pg.getValor());
+            }
+            retorno.append("\nSaldo ").append(valor);
+        }
 
     }
 
