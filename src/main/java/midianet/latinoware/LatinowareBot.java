@@ -1,6 +1,10 @@
 package midianet.latinoware;
 
+import midianet.latinoware.bussines.FinanceiroBussines;
+import midianet.latinoware.bussines.ParametroBussines;
 import midianet.latinoware.bussines.PessoaBussines;
+import midianet.latinoware.model.Pagamento;
+import midianet.latinoware.model.Parametro;
 import midianet.latinoware.model.Pessoa;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +25,17 @@ public class LatinowareBot extends TelegramLongPollingBot {
 
     private static final String CMD_START = "/start";
     private static final String CMD_LIST = "/list";
+    private static final String CMD_PAYMENT = "/payment";
+    private static final String CMD_ACCOUNT = "/account";
 
     @Autowired
-    private PessoaBussines bussines;
+    private PessoaBussines bussinesPessoa;
+
+    @Autowired
+    private ParametroBussines bussinesParametro;
+
+    @Autowired
+    private FinanceiroBussines bussinesFinanceiro;
 
     @Override
     public String getBotToken() {
@@ -43,18 +55,22 @@ public class LatinowareBot extends TelegramLongPollingBot {
             actionList(update);
         }else if(CMD_START.equals(update.getMessage().getText())){
             actionStart(update);
+        }else if(CMD_PAYMENT.equals(update.getMessage().getText())){
+
+        }else if(CMD_ACCOUNT.equals(update.getMessage().getText())){
+            actionAccount(update);
         }
     }
 
     private void actionStart(final Update update){
         try {
-            final String nome = String.format("%s %s", update.getMessage().getFrom().getFirstName(), update.getMessage().getFrom().getLastName());
-            final Optional<Pessoa> old = bussines.findByIdTelegram(update.getMessage().getChatId());
+            final String nome = String.format("%s %s", update.getMessage().getFrom().getFirstName(),  update.getMessage().getFrom().getLastName() == null  ? "" :update.getMessage().getFrom().getLastName());
+            final Optional<Pessoa> old = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
             final Pessoa yong = new Pessoa();
             old.ifPresent(p -> yong.setId(p.getId()));
             yong.setNome(nome);
             yong.setIdTelegram(update.getMessage().getChatId());
-            bussines.save(yong);
+            bussinesPessoa.save(yong);
             final String message = "Bem vindo ".concat(nome);
             send(update,message);
         }catch(Exception e){
@@ -65,13 +81,27 @@ public class LatinowareBot extends TelegramLongPollingBot {
     private void actionList(final Update update){
         try {
             final StringBuilder names = new StringBuilder();
-            final List<Pessoa> list = bussines.listAll();
+            final List<Pessoa> list = bussinesPessoa.listAll();
             list.forEach(p -> names.append(p.getNome().concat("\n")));
             names.append(list.size()).append( " inscritos");
             send(update,names.toString());
         }catch(Exception e){
             log.error(e);
         }
+    }
+
+    private void actionAccount(final Update update){
+        send(update," Banco Santander \n Agência 2032 \n Conta Poupança 60 000695-5 \n Marcos Fernando da Costa \n CPF 854.024.191-91 \n Email midianet@gmail.com");
+    }
+
+    private void actionPayment(final Update update){
+        final StringBuilder retorno = new StringBuilder();
+        final Parametro p = bussinesParametro.findByChave("CARAVANA").get();
+        double valor = Double.parseDouble(p.getValor()) * -1;
+        retorno.append(p.getDescricao()).append(" ").append(p.getValor());
+        final List<Pagamento> pagamentos =  bussinesFinanceiro.
+
+
     }
 
     private void send(final Update update, final String message){

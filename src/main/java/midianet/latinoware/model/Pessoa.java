@@ -41,11 +41,4 @@ public class Pessoa {
         this.cadastro = data;
     }
 
-    public Long getInscricao() {
-        return inscricao;
-    }
-
-    public void setInscricao(final Long numero) {
-        this.inscricao = numero;
-    }
 }
