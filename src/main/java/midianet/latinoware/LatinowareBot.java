@@ -57,7 +57,7 @@ public class LatinowareBot extends TelegramLongPollingBot {
         }else if(CMD_START.equals(update.getMessage().getText())){
             actionStart(update);
         }else if(CMD_PAYMENT.equals(update.getMessage().getText())){
-
+            actionPayment(update);
         }else if(CMD_ACCOUNT.equals(update.getMessage().getText())){
             actionAccount(update);
         }
