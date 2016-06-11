@@ -89,12 +89,14 @@ public class PagamentoRepository {
         final StringBuilder sql = new StringBuilder();
         sql.append("select paga_id,")
                 .append("       paga_data,")
-                .append("       paga_valor,")
+                .append("       paga_valor ")
                 .append("  from tb_pagamento ")
                 .append(" where pess_id = :idPessoa")
                 .append("  order by paga_data");
         try {
-            return jdbc.query(sql.toString(), this::mapRow);
+            final Map<String, Object> param = new HashMap();
+            param.put("idPessoa", idPessoa);
+            return jdbc.query(sql.toString(), param, this::mapRow);
         } catch (Exception e) {
             log.error(e);
             throw new InfraException(e);

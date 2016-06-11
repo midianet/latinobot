@@ -14,6 +14,7 @@ import org.telegram.telegrambots.api.methods.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -92,24 +93,27 @@ public class LatinowareBot extends TelegramLongPollingBot {
     }
 
     private void actionAccount(final Update update){
-        send(update," Banco Santander \n Agência 2032 \n Conta Poupança 60 000695-5 \n Marcos Fernando da Costa \n CPF 854.024.191-91 \n Email midianet@gmail.com");
+        send(update,"  Banco Santander \n Agência 2032 \n Conta Poupança 60 000695-5 \n Marcos Fernando da Costa \n CPF 854.024.191-91 \n Email midianet@gmail.com");
     }
 
     private void actionPayment(final Update update){
         final StringBuilder retorno = new StringBuilder();
         final Parametro p = bussinesParametro.findByChave("CARAVANA").get();
         double valor = Double.parseDouble(p.getValor());
+        double saldo = 0;
         retorno.append(p.getDescricao()).append(" ").append(p.getValor());
         final Optional<Pessoa> pes = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
         if(pes.isPresent()){
             final List<Pagamento> pagamentos = bussinesFinanceiro.listByPessoa(pes.get());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             for(Pagamento pg : pagamentos){
-                valor = valor - pg.getValor();
-                retorno.append("\n").append(pg.getValor());
+                saldo = saldo + pg.getValor();
+                retorno.append("\n").append(sdf.format(pg.getData())).append(" ").append(pg.getValor());
             }
-            retorno.append("\nSaldo ").append(valor);
+            saldo = saldo - valor;
+            retorno.append("\nSaldo ").append(saldo);
         }
-
+        send(update,retorno.toString());
     }
 
     private void send(final Update update, final String message){

@@ -43,7 +43,7 @@ public class ParametroRepository {
         final StringBuilder sql = new StringBuilder();
         sql.append("select para_chave,")
                 .append("       para_descricao,")
-                .append("       para_valor,")
+                .append("       para_valor ")
                 .append("  from tb_parametro ")
                 .append(" where para_chave = :chave");
         final Map<String,Object> param = new HashMap();
