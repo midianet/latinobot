@@ -72,12 +72,24 @@ public class LatinowareBot extends TelegramLongPollingBot {
             old.ifPresent(p -> yong.setId(p.getId()));
             yong.setNome(nome);
             yong.setIdTelegram(update.getMessage().getChatId());
+            if(yong.getId() != null){
+                
+            }
             bussinesPessoa.save(yong);
             final String message = "Bem vindo ".concat(nome);
             send(update,message);
+            if(enviar)
+
+
         }catch(Exception e){
             log.error(e);
         }
+    }
+
+    private void newUser(final Update update){
+        final List<Pessoa> list = bussinesPessoa.listAll();
+
+
     }
 
     private void actionList(final Update update){
