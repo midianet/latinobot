@@ -66,49 +66,48 @@ public class LatinowareBot extends TelegramLongPollingBot {
 
     private void actionStart(final Update update){
         try {
+            final String chatId = update.getMessage().getChatId().toString();
             final String nome = String.format("%s %s", update.getMessage().getFrom().getFirstName(),  update.getMessage().getFrom().getLastName() == null  ? "" :update.getMessage().getFrom().getLastName());
             final Optional<Pessoa> old = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
             final Pessoa yong = new Pessoa();
             old.ifPresent(p -> yong.setId(p.getId()));
             yong.setNome(nome);
             yong.setIdTelegram(update.getMessage().getChatId());
-            if(yong.getId() != null){
-                
+            List<Pessoa> list = null;
+            if(yong.getId() == null){
+                list = bussinesPessoa.listAll();
             }
             bussinesPessoa.save(yong);
             final String message = "Bem vindo ".concat(nome);
-            send(update,message);
-            if(enviar)
-
-
+            send(chatId,message);
+            if(list != null){
+                list.forEach(pessoa -> send(pessoa.getIdTelegram().toString(), pessoa.getNome().concat(" um novo companheiro de caravana foi adicionado ").concat(yong.getNome())));
+            }
         }catch(Exception e){
             log.error(e);
         }
     }
 
-    private void newUser(final Update update){
-        final List<Pessoa> list = bussinesPessoa.listAll();
-
-
-    }
-
     private void actionList(final Update update){
         try {
+            final String chatId = update.getMessage().getChatId().toString();
             final StringBuilder names = new StringBuilder();
             final List<Pessoa> list = bussinesPessoa.listAll();
             list.forEach(p -> names.append(p.getNome().concat("\n")));
             names.append(list.size()).append( " inscritos");
-            send(update,names.toString());
+            send(chatId,names.toString());
         }catch(Exception e){
             log.error(e);
         }
     }
 
     private void actionAccount(final Update update){
-        send(update,"  Banco Santander \n Agência 2032 \n Conta Poupança 60 000695-5 \n Marcos Fernando da Costa \n CPF 854.024.191-91 \n Email midianet@gmail.com");
+        final String chatId = update.getMessage().getChatId().toString();
+        send(chatId,"  Banco Santander \n Agência 2032 \n Conta Poupança 60 000695-5 \n Marcos Fernando da Costa \n CPF 854.024.191-91 \n Email midianet@gmail.com");
     }
 
     private void actionPayment(final Update update){
+        final String chatId = update.getMessage().getChatId().toString();
         final StringBuilder retorno = new StringBuilder();
         final Parametro p = bussinesParametro.findByChave("CARAVANA").get();
         double valor = Double.parseDouble(p.getValor());
@@ -125,13 +124,13 @@ public class LatinowareBot extends TelegramLongPollingBot {
             saldo = saldo - valor;
             retorno.append("\nSaldo ").append(saldo);
         }
-        send(update,retorno.toString());
+        send(chatId,retorno.toString());
     }
 
-    private void send(final Update update, final String message){
+    private void send(final String chatId, final String message){
         try {
             final SendMessage m = new SendMessage();
-            m.setChatId(update.getMessage().getChatId().toString());
+            m.setChatId(chatId);
             m.setText(message);
             sendMessage(m);
         } catch (TelegramApiException e) {
