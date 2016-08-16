@@ -15,7 +15,6 @@ import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +28,7 @@ public class LatinowareBot extends TelegramLongPollingBot {
     private static final String CMD_LIST = "/list";
     private static final String CMD_PAYMENT = "/payment";
     private static final String CMD_ACCOUNT = "/account";
+    private static final String CMD_NOTICE = "/notice";
 
     @Autowired
     private PessoaBussines bussinesPessoa;
@@ -61,6 +61,17 @@ public class LatinowareBot extends TelegramLongPollingBot {
             actionPayment(update);
         }else if(CMD_ACCOUNT.equals(update.getMessage().getText())){
             actionAccount(update);
+        }else if (update.getMessage().getText().indexOf(CMD_NOTICE) != -1 ){
+            actionNotice(update);
+        }
+    }
+
+    private void actionNotice(final Update update){
+        try {
+            final List<Pessoa> list = bussinesPessoa.listAll();
+            list.forEach(p -> send(p.getIdTelegram().toString(),update.getMessage().getText().replace(CMD_NOTICE,"")));
+        }catch(Exception e){
+            log.error(e);
         }
     }
 
