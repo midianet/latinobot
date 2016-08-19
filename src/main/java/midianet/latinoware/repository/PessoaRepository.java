@@ -31,6 +31,7 @@ public class PessoaRepository {
                             .withTableName("tb_pessoa")
                             .usingColumns("pess_nome",
                                           "tele_id",
+                                          "pess_pagou",
                                           "pess_cadastro")
                             .usingGeneratedKeyColumns("pess_id");
     }
@@ -40,6 +41,7 @@ public class PessoaRepository {
             final Map params = new HashMap();
             params.put("pess_nome",    pessoa.getNome());
             params.put("tele_id",      pessoa.getIdTelegram());
+            params.put("pess_pagou", false);
             params.put("pess_cadastro", new Timestamp(new Date().getTime()));
             pessoa.setId(jdbcInsert.executeAndReturnKey(params).longValue());
         }catch(Exception e){
@@ -51,12 +53,14 @@ public class PessoaRepository {
     public void update(final Pessoa pessoa) throws InfraException{
         final StringBuilder sql = new StringBuilder();
         sql.append("update tb_pessoa set ")
-           .append("       pess_nome = :nome,")
+           .append("       pess_nome = :nome ,")
+           .append("        pess_pagou = :pagou ,")
            .append("       tele_id   = :telegram ")
            .append(" where pess_id   = :id");
         final Map<String,Object> param = new HashMap();
         param.put("nome",     pessoa.getNome());
         param.put("telegram", pessoa.getIdTelegram());
+        param.put("pagou",    pessoa.isPagou());
         param.put("id",       pessoa.getId());
         try {
             jdbc.update(sql.toString(), param);
@@ -84,6 +88,7 @@ public class PessoaRepository {
         sql.append("select pess_id,")
            .append("       pess_nome,")
            .append("       pess_cadastro,")
+           .append("       pess_pagou,")
            .append("       tele_id")
            .append("  from tb_pessoa ")
            .append(" where tele_id = :id");
@@ -104,6 +109,7 @@ public class PessoaRepository {
         sql.append("select pess_id,")
                 .append("       pess_nome,")
                 .append("       pess_cadastro,")
+                .append("       pess_pagou,")
                 .append("       tele_id")
                 .append("  from tb_pessoa ")
                 .append(" where pess_id = :id");
@@ -122,6 +128,7 @@ public class PessoaRepository {
         sql.append("select pess_id,")
            .append("       pess_nome,")
            .append("       pess_cadastro,")
+           .append("       pess_pagou,")
            .append("       tele_id")
            .append("  from tb_pessoa ")
            .append("  order by pess_cadastro");
@@ -138,9 +145,9 @@ public class PessoaRepository {
         pessoa.setId        (rs.getLong     ("pess_id"));
         pessoa.setNome      (rs.getString   ("pess_nome"));
         pessoa.setCadastro  (rs.getTimestamp("pess_cadastro"));
+        pessoa.setPagou     (rs.getBoolean  ("pess_pagou"));
         pessoa.setIdTelegram(rs.getLong     ("tele_id"));
         return pessoa;
     }
-
 
 }

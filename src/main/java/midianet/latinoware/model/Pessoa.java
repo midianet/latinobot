@@ -8,6 +8,7 @@ public class Pessoa {
     private String nome;
     private Date   cadastro;
     private Long   inscricao;
+    private boolean pagou;
 
     public Long getId() {
         return id;
@@ -39,6 +40,14 @@ public class Pessoa {
 
     public void setCadastro(final Date data) {
         this.cadastro = data;
+    }
+
+    public void setPagou(boolean flag) {
+        this.pagou = flag;
+    }
+
+    public boolean isPagou() {
+        return pagou;
     }
 
 }

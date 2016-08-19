@@ -17,6 +17,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class LatinowareBot extends TelegramLongPollingBot {
@@ -103,9 +104,15 @@ public class LatinowareBot extends TelegramLongPollingBot {
         try {
             final String chatId = update.getMessage().getChatId().toString();
             final StringBuilder names = new StringBuilder();
-            final List<Pessoa> list = bussinesPessoa.listAll();
-            list.forEach(p -> names.append(p.getNome().concat("\n")));
-            names.append(list.size()).append( " inscritos");
+
+            final List<Pessoa> listInscritos = bussinesPessoa.listAll().stream().filter(p -> p.isPagou()).collect(Collectors.toList());
+            final List<Pessoa> listEspera    = bussinesPessoa.listAll().stream().filter(p -> !p.isPagou()).collect(Collectors.toList());
+            names.append("Inscritos ").append(listInscritos.size()).append("\n");
+            listInscritos.forEach(p -> names.append(p.getNome().concat("\n")));
+            names.append("\n\n");
+            names.append("Em lista ").append(listEspera.size());
+            listEspera.forEach(p -> names.append(p.getNome().concat("\n")));
+            names.append("Total ").append(listInscritos.size() + listEspera.size());
             send(chatId,names.toString());
         }catch(Exception e){
             log.error(e);
