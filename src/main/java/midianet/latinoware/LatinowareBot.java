@@ -107,12 +107,13 @@ public class LatinowareBot extends TelegramLongPollingBot {
 
             final List<Pessoa> listInscritos = bussinesPessoa.listAll().stream().filter(p -> p.isPagou()).collect(Collectors.toList());
             final List<Pessoa> listEspera    = bussinesPessoa.listAll().stream().filter(p -> !p.isPagou()).collect(Collectors.toList());
-            names.append("Inscritos ").append(listInscritos.size()).append("\n");
+            names.append("Inscritos: ").append(listInscritos.size()).append("\n");
             listInscritos.forEach(p -> names.append(p.getNome().concat("\n")));
-            names.append("\n\n");
-            names.append("Em lista ").append(listEspera.size());
+            names.append("\n");
+            names.append("Em lista: ").append(listEspera.size()).append("\n");
             listEspera.forEach(p -> names.append(p.getNome().concat("\n")));
-            names.append("Total ").append(listInscritos.size() + listEspera.size());
+            names.append("\n");
+            names.append("Total: ").append(listInscritos.size() + listEspera.size());
             send(chatId,names.toString());
         }catch(Exception e){
             log.error(e);
