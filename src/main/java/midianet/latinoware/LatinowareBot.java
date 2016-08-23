@@ -30,6 +30,7 @@ public class LatinowareBot extends TelegramLongPollingBot {
     private static final String CMD_PAYMENT = "/payment";
     private static final String CMD_ACCOUNT = "/account";
     private static final String CMD_NOTICE = "/notice";
+    private static final String CMD_PROFILE = "/profile";
 
     @Autowired
     private PessoaBussines bussinesPessoa;
@@ -64,6 +65,33 @@ public class LatinowareBot extends TelegramLongPollingBot {
             actionAccount(update);
         }else if (update.getMessage().getText().indexOf(CMD_NOTICE) != -1 ){
             actionNotice(update);
+        }else if(CMD_PROFILE.equals(update.getMessage().getText())){
+            actionProfile(update);
+        }
+    }
+
+    private void actionProfile(final Update update){
+        try{
+            final StringBuilder ret = new StringBuilder();
+            final Optional<Pessoa> pessoa = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
+            pessoa.ifPresent(p ->{
+                ret.append("Nome: ")         .append(p.getNome()).append("\n");
+                ret.append("Status: ")       .append(p.isPagou()        ? "Pagou Entrada":"Sem Pagamentos").append("\n");
+                ret.append("Cerveja: ")      .append(p.isCerveja()      ? "Sim":"Não").append("\n");
+                ret.append("Refrigerante: ") .append(p.isRefrigerante() ? "Sim":"Não").append("\n");
+                ret.append("Energetico: ")   .append(p.isEnergetico()   ? "Sim":"Não").append("\n");
+                ret.append("Suco: ")         .append(p.isSuco()         ? "Sim":"Não").append("\n");
+                ret.append("Ice: ")          .append(p.isIce()          ? "Sim":"Não").append("\n");
+                ret.append("Toddynho: ")     .append(p.isToddynho()     ? "Sim":"Não").append("\n");
+                ret.append("Água de Coco : ").append(p.isAguaCoco()     ? "Sim":"Não").append("\n");
+
+                ret.append("Acomodação:");
+                List<Pessoa>
+
+            });
+
+        }catch(Exception e){
+            log.error(e);
         }
     }
 
@@ -104,7 +132,6 @@ public class LatinowareBot extends TelegramLongPollingBot {
         try {
             final String chatId = update.getMessage().getChatId().toString();
             final StringBuilder names = new StringBuilder();
-
             final List<Pessoa> listInscritos = bussinesPessoa.listAll().stream().filter(p -> p.isPagou()).collect(Collectors.toList());
             final List<Pessoa> listEspera    = bussinesPessoa.listAll().stream().filter(p -> !p.isPagou()).collect(Collectors.toList());
             names.append("Inscritos: ").append(listInscritos.size()).append("\n");
@@ -135,7 +162,7 @@ public class LatinowareBot extends TelegramLongPollingBot {
         final Optional<Pessoa> pes = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
         if(pes.isPresent()){
             final List<Pagamento> pagamentos = bussinesFinanceiro.listByPessoa(pes.get());
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             for(Pagamento pg : pagamentos){
                 saldo = saldo + pg.getValor();
                 retorno.append("\n").append(sdf.format(pg.getData())).append(" ").append(pg.getValor());

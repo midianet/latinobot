@@ -3,7 +3,9 @@ package midianet.latinoware.bussines;
 
 import midianet.latinoware.exception.InfraException;
 import midianet.latinoware.model.Pessoa;
+import midianet.latinoware.model.Quarto;
 import midianet.latinoware.repository.PessoaRepository;
+import midianet.latinoware.repository.QuartoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,9 @@ public class PessoaBussines {
     @Autowired
     private PessoaRepository repository;
 
+    @Autowired
+    private QuartoRepository quartoRepository;
+
     public Optional<Pessoa> findById(final Long id) throws InfraException{
         return repository.findById(id);
     }
@@ -28,6 +33,10 @@ public class PessoaBussines {
 
     public List<Pessoa> listAll() throws InfraException{
         return repository.listAll();
+    }
+
+    public Quarto descQuartobyPessoa(final Pessoa pessoa)throws InfraException{
+        pessoa.setQuarto(quartoRepository.findById(pessoa)
     }
 
     @Transactional

@@ -23,10 +23,10 @@ public class App {
 //    }
 
     @Autowired
-    private void initBot(final LatinowareBot latinowareBot){
+    private void initBot(final LatinowareBot bot){
         try {
             teleBot = new TelegramBotsApi();
-            teleBot.registerBot(latinowareBot);
+            teleBot.registerBot(bot);
         } catch (TelegramApiException e) {
             log.error(e);
         }
