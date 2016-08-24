@@ -2,8 +2,10 @@ package midianet.latinoware.repository;
 
 import midianet.latinoware.exception.InfraException;
 import midianet.latinoware.model.Parametro;
+import midianet.latinoware.model.Quarto;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -26,17 +28,19 @@ public class QuartoRepository {
     @Autowired
     private NamedParameterJdbcTemplate jdbc;
 
-    public Optional<Parametro> findById(final Long id) throws InfraException{
+    public Optional<Quarto> findById(final Long id) throws InfraException{
         final StringBuilder sql = new StringBuilder();
-        sql.append("select para_chave,")
-                .append("       para_descricao,")
-                .append("       para_valor ")
-                .append("  from tb_parametro ")
-                .append(" where para_chave = :chave");
+        sql.append("select quar_id,")
+                .append("       quar_tipo,")
+                .append("       quar_sexo ")
+                .append("  from tb_quarto ")
+                .append(" where quar_id = :id");
         final Map<String,Object> param = new HashMap();
-        param.put("chave",chave);
+        param.put("id",id);
         try {
-            return Optional.ofNullable(jdbc.queryForObject(sql.toString(),param, this::mapRow));
+            return Optional.ofNullable(jdbc.queryForObject(sql.toString(), param, this::mapRow));
+        }catch(EmptyResultDataAccessException e){
+            return Optional.empty();
         }catch(Exception e){
             log.error(e);
             throw new InfraException(e);
@@ -45,12 +49,12 @@ public class QuartoRepository {
 
 
 
-    private Parametro mapRow(final ResultSet rs, final int i) throws SQLException {
-        final Parametro parametro = new Parametro();
-        parametro.setChave     (rs.getString   ("para_chave"));
-        parametro.setDescricao (rs.getString   ("para_descricao"));
-        parametro.setValor     (rs.getString   ("para_valor"));
-        return parametro;
+    private Quarto mapRow(final ResultSet rs, final int i) throws SQLException {
+        final Quarto q = new Quarto();
+        q.setId(rs.getLong("quar_id"));
+        q.setTipo(rs.getInt("quar_tipo"));
+        q.setSexo(rs.getInt("quar_sexo"));
+        return q;
     }
 
 }

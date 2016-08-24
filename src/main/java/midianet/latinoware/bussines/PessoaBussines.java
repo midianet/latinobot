@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PessoaBussines {
@@ -35,8 +36,14 @@ public class PessoaBussines {
         return repository.listAll();
     }
 
-    public Quarto descQuartobyPessoa(final Pessoa pessoa)throws InfraException{
-        pessoa.setQuarto(quartoRepository.findById(pessoa)
+    public Optional<Quarto> lotacaoQuartoby(final Long quartoId)throws InfraException{
+        final Optional<Quarto> quarto = quartoRepository.findById(quartoId);
+        quarto.ifPresent(q -> {
+          quarto.get().setOcupantes(repository.listAll()
+                  .stream().filter(p -> p.getIdQuarto() == quartoId)
+                  .collect(Collectors.toList()));
+        });
+        return quarto;
     }
 
     @Transactional

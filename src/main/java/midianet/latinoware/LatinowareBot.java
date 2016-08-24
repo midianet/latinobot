@@ -6,6 +6,7 @@ import midianet.latinoware.bussines.PessoaBussines;
 import midianet.latinoware.model.Pagamento;
 import midianet.latinoware.model.Parametro;
 import midianet.latinoware.model.Pessoa;
+import midianet.latinoware.model.Quarto;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,11 +73,12 @@ public class LatinowareBot extends TelegramLongPollingBot {
 
     private void actionProfile(final Update update){
         try{
+            final String chatId = update.getMessage().getChatId().toString();
             final StringBuilder ret = new StringBuilder();
             final Optional<Pessoa> pessoa = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
             pessoa.ifPresent(p ->{
                 ret.append("Nome: ")         .append(p.getNome()).append("\n");
-                ret.append("Status: ")       .append(p.isPagou()        ? "Pagou Entrada":"Sem Pagamentos").append("\n");
+                ret.append("Status: ")       .append(p.isPagou()        ? "Pagamento Parcial":"Sem Pagamentos").append("\n");
                 ret.append("Cerveja: ")      .append(p.isCerveja()      ? "Sim":"Não").append("\n");
                 ret.append("Refrigerante: ") .append(p.isRefrigerante() ? "Sim":"Não").append("\n");
                 ret.append("Energetico: ")   .append(p.isEnergetico()   ? "Sim":"Não").append("\n");
@@ -84,12 +86,14 @@ public class LatinowareBot extends TelegramLongPollingBot {
                 ret.append("Ice: ")          .append(p.isIce()          ? "Sim":"Não").append("\n");
                 ret.append("Toddynho: ")     .append(p.isToddynho()     ? "Sim":"Não").append("\n");
                 ret.append("Água de Coco : ").append(p.isAguaCoco()     ? "Sim":"Não").append("\n");
-
-                ret.append("Acomodação:");
-                List<Pessoa>
-
+                final Optional<Quarto> quarto = bussinesPessoa.lotacaoQuartoby(p.getIdQuarto());
+                ret.append("Acomodação: ").append(quarto.isPresent() ? quarto.get().getTipoText() : "Indefinido").append("\n");
+                quarto.ifPresent(q -> {
+                    ret.append("Ocupantes:\n");
+                    q.getOcupantes().forEach(o -> ret.append(o.getNome()).append("\n"));
+                });
+                send(chatId,ret.toString());
             });
-
         }catch(Exception e){
             log.error(e);
         }
@@ -154,23 +158,28 @@ public class LatinowareBot extends TelegramLongPollingBot {
 
     private void actionPayment(final Update update){
         final String chatId = update.getMessage().getChatId().toString();
-        final StringBuilder retorno = new StringBuilder();
-        final Parametro p = bussinesParametro.findByChave("CARAVANA").get();
-        double valor = Double.parseDouble(p.getValor());
-        double saldo = 0;
-        retorno.append(p.getDescricao()).append(" ").append(p.getValor());
-        final Optional<Pessoa> pes = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
-        if(pes.isPresent()){
-            final List<Pagamento> pagamentos = bussinesFinanceiro.listByPessoa(pes.get());
-            final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            for(Pagamento pg : pagamentos){
-                saldo = saldo + pg.getValor();
-                retorno.append("\n").append(sdf.format(pg.getData())).append(" ").append(pg.getValor());
+        try {
+            final StringBuilder retorno = new StringBuilder();
+            final Parametro p = bussinesParametro.findByChave("CARAVANA").get();
+            double valor = Double.parseDouble(p.getValor());
+            double saldo = 0;
+            retorno.append(p.getDescricao()).append(" ").append(p.getValor());
+            final Optional<Pessoa> pes = bussinesPessoa.findByIdTelegram(update.getMessage().getChatId());
+            if (pes.isPresent()) {
+                final List<Pagamento> pagamentos = bussinesFinanceiro.listByPessoa(pes.get());
+                final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                for (Pagamento pg : pagamentos) {
+                    saldo = saldo + pg.getValor();
+                    retorno.append("\n").append(sdf.format(pg.getData())).append(" ").append(pg.getValor());
+                }
+                saldo = saldo - valor;
+                retorno.append("\nSaldo ").append(saldo);
             }
-            saldo = saldo - valor;
-            retorno.append("\nSaldo ").append(saldo);
+            send(chatId, retorno.toString());
+        }catch(Exception e){
+            log.error(e);
+            send(chatId,e.getMessage());
         }
-        send(chatId,retorno.toString());
     }
 
     private void send(final String chatId, final String message){

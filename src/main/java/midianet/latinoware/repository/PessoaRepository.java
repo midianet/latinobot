@@ -171,6 +171,7 @@ public class PessoaRepository {
            .append("       pess_nome,")
            .append("       pess_cadastro,")
            .append("       pess_pagou,")
+           .append("       quar_id,")
            .append("       pess_cerveja,")
            .append("       pess_refrigerante,")
            .append("       pess_suco,")
@@ -194,6 +195,7 @@ public class PessoaRepository {
         pessoa.setNome         (rs.getString   ("pess_nome"));
         pessoa.setCadastro     (rs.getTimestamp("pess_cadastro"));
         pessoa.setPagou        (rs.getBoolean  ("pess_pagou"));
+        pessoa.setIdQuarto     (rs.getLong     ("quar_id") == 0 ? null : rs.getLong("quar_id") );
         pessoa.setCerveja      (rs.getBoolean  ("pess_cerveja"));
         pessoa.setRefrigerante (rs.getBoolean  ("pess_refrigerante"));
         pessoa.setSuco         (rs.getBoolean  ("pess_suco"));

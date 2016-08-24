@@ -49,6 +49,18 @@ public class Quarto {
         return ocupantes;
     }
 
+    public String getTipoText(){
+        if(tipo == TIPO_DUPLO){
+            return "Duplo/Casal";
+        }else if(tipo == TIPO_TRIPLO){
+            return "Triplo";
+        }else if (tipo == TIPO_QUADRUPLO){
+            return "Quádruplo";
+        }else{
+            return "Indefinido";
+        }
+    }
+
     public boolean isLotado(){
         boolean retorno = false;
         if(ocupantes != null){
